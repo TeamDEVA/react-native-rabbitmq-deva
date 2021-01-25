@@ -1,0 +1,23 @@
+{
+  "name": "react-native-rabbitmq-deva",
+  "version": "1.0.0",
+  "description": "react-native-rabbitmq-deva",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "homepage": "https://github.com/cs20131064/react-native-rabbitmq-deva",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TeamDEVA/react-native-rabbitmq-deva.git"
+  },
+  "bugs": {
+    "url": "https://github.com/TeamDEVA/react-native-rabbitmq-deva/issues"
+  }
+}
