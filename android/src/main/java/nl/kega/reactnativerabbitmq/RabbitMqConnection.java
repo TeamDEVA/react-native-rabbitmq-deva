@@ -23,8 +23,8 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Consumer;
-import com.rabbitmq.client.ShutdownListener; 
-import com.rabbitmq.client.ShutdownSignalException; 
+import com.rabbitmq.client.ShutdownListener;
+import com.rabbitmq.client.ShutdownSignalException;
 import com.rabbitmq.client.RecoveryListener;
 import com.rabbitmq.client.Recoverable;
 import com.rabbitmq.client.RecoverableConnection;
@@ -43,7 +43,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
     private Callback status;
 
     private ArrayList<RabbitMqQueue> queues = new ArrayList<RabbitMqQueue>();
-    private ArrayList<RabbitMqExchange> exchanges = new ArrayList<RabbitMqExchange>(); 
+    private ArrayList<RabbitMqExchange> exchanges = new ArrayList<RabbitMqExchange>();
 
     public RabbitMqConnection(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -60,7 +60,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
     @ReactMethod
     public void initialize(ReadableMap config) {
         this.config = config;
-        
+
         this.factory = new ConnectionFactory();
         this.factory.setUsername(this.config.getString("username"));
         this.factory.setPassword(this.config.getString("password"));
@@ -69,7 +69,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
         this.factory.setPort(this.config.getInt("port"));
         this.factory.setAutomaticRecoveryEnabled(true);
         this.factory.setRequestedHeartbeat(10);
-   
+
         try {
             if (this.config.hasKey("ssl") && this.config.getBoolean("ssl")) {
                 this.factory.useSslProtocol();
@@ -93,7 +93,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
             event.putString("name", "connected");
 
             this.context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RabbitMqConnectionEvent", event);
-        }else{ 
+        }else{
 
             try {
                 this.connection = (RecoverableConnection)this.factory.newConnection();
@@ -107,7 +107,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
 
                 this.context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RabbitMqConnectionEvent", event);
 
-                this.connection = null; 
+                this.connection = null;
 
             }
 
@@ -123,22 +123,22 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
                         }
                     });
 
-                 
+
                     this.connection.addRecoveryListener(new RecoveryListener() {
-                      
+
                         @Override
                         public void handleRecoveryStarted(Recoverable recoverable) {
                             Log.e("RabbitMqConnection", "RecoveryStarted " + recoverable);
                         }
-                      
+
                         @Override
                         public void handleRecovery(Recoverable recoverable) {
                             Log.e("RabbitMqConnection", "Recoverable " + recoverable);
                             onRecovered();
                         }
-                        
+
                     });
-                   
+
 
                     this.channel = connection.createChannel();
                     this.channel.basicQos(1);
@@ -148,7 +148,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
                         public void handleNack(long deliveryTag, boolean multiple) throws IOException {
                             Log.e("RabbitMqQueue", "Not ack received");
                         }
-                
+
                         public void handleAck(long deliveryTag, boolean multiple) throws IOException {
                             Log.e("RabbitMqQueue", "Ack received");
                         }
@@ -165,7 +165,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
                     Log.e("RabbitMqConnectionChannel", "Create channel error " + e);
                     e.printStackTrace();
 
-                } 
+                }
             }
         }
     }
@@ -178,7 +178,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
 
     @ReactMethod
     public void bindQueue(String exchange_name, String queue_name, String routing_key) {
-        
+
         RabbitMqQueue found_queue = null;
         for (RabbitMqQueue queue : queues) {
 		    if (Objects.equals(queue_name, queue.name)){
@@ -200,7 +200,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
 
     @ReactMethod
     public void unbindQueue(String exchange_name, String queue_name, String routing_key) {
-        
+
         RabbitMqQueue found_queue = null;
         for (RabbitMqQueue queue : queues) {
 		    if (Objects.equals(queue_name, queue.name)){
@@ -248,7 +248,7 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
             found_queue.basicAck(long_delivery_tag);
         }
 
-     
+
     }
 
     /*
@@ -304,38 +304,38 @@ class RabbitMqConnection extends ReactContextBaseJavaModule  {
         try {
 
             this.queues = new ArrayList<RabbitMqQueue>();
-            this.exchanges = new ArrayList<RabbitMqExchange>(); 
-            
+            this.exchanges = new ArrayList<RabbitMqExchange>();
+
             this.channel.close();
 
             this.connection.close();
          } catch (Exception e){
             Log.e("RabbitMqConnection", "Connection closing error " + e);
             e.printStackTrace();
-        } finally { 
-            this.connection = null; 
-            this.factory = null;
+        } finally {
+            this.connection = null;
             this.channel = null;
-        } 
+//            this.factory = null;
+        }
     }
 
-    private void onClose(ShutdownSignalException cause) { 
+    private void onClose(ShutdownSignalException cause) {
         Log.e("RabbitMqConnection", "Closed");
 
         WritableMap event = Arguments.createMap();
         event.putString("name", "closed");
 
         this.context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RabbitMqConnectionEvent", event);
-    } 
+    }
 
-    private void onRecovered() { 
+    private void onRecovered() {
         Log.e("RabbitMqConnection", "Recovered");
 
         WritableMap event = Arguments.createMap();
         event.putString("name", "reconnected");
 
         this.context.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("RabbitMqConnectionEvent", event);
-    } 
+    }
 
     @Override
     public void onCatalystInstanceDestroy() {
